@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE package-info SYSTEM "http://www.simplemachines.org/xml/package-info">
+<package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
+	<id>emanuele:clone_boards</id>
+	<name>Clone Boards</name>
+	<version>0.1.0</version>
+	<license>
+<!--
+/**
+ * Clone Boards (CBs)
+ *
+ * @package CBs
+ * @author emanuele
+ * @copyright 2011 emanuele, Simple Machines
+ * @license http://www.simplemachines.org/about/smf/license.php BSD
+ *
+ * @version 0.1.0
+ */
+-->
+	</license>
+	<type>modification</type>
+
+	<install for="2.0 - 2.0.99">
+		<modification>modifications.xml</modification>
+		<modification>lang.xml</modification>
+		<require-file name="Subs-BoardIndex-clone.php" destination="$sourcedir" />
+		<database>install.php</database>
+		<redirect url="?action=admin;area=manageboards;sa=main" />
+	</install>
+	<uninstall for="2.0 - 2.0.99">
+		<modification reverse="true">modifications.xml</modification>
+		<modification reverse="true">lang.xml</modification>
+		<remove-file name="$sourcedir/Subs-BoardIndex-clone.php" />
+		<redirect url="?action=admin;area=packages" />
+	</uninstall>
+</package-info>

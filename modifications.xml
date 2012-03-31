@@ -1,0 +1,175 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+
+	<id>emanuele:clone_boards</id>
+	<name>Clone Boards</name>
+	<version>0.1.0</version>
+	<license>
+<!--
+/**
+ * Clone Boards (CBs)
+ *
+ * @package CBs
+ * @author emanuele
+ * @copyright 2011 emanuele, Simple Machines
+ * @license http://www.simplemachines.org/about/smf/license.php BSD
+ *
+ * @version 0.1.0
+ */
+-->
+	</license>
+
+	<file name="$sourcedir/BoardIndex.php">
+		<operation>
+			<search position="replace"><![CDATA[	require_once($sourcedir . '/Subs-BoardIndex.php');]]></search>
+			<add><![CDATA[	require_once($sourcedir . '/Subs-BoardIndex-clone.php');]]></add>
+		</operation>
+	</file>
+
+	<file name="$sourcedir/Load.php">
+		<operation>
+			<search position="before"><![CDATA[b.id_theme, b.override_theme, b.count_posts, b.id_profile, b.redirect,]]></search>
+			<add><![CDATA[ b.clone,]]></add>
+		</operation>
+		<operation>
+			<search position="before"><![CDATA[				'redirect' => $row['redirect'],]]></search>
+			<add><![CDATA[
+				'clone' => $row['clone'],]]></add>
+		</operation>
+	</file>
+
+	<file name="$sourcedir/MessageIndex.php">
+		<operation>
+			<search position="before"><![CDATA[		redirectexit($board_info['redirect']);
+	}]]></search>
+			<add><![CDATA[
+	if ($board_info['clone'])
+	{
+		redirectexit($scripturl . '?board=' . $board_info['clone'] . '.0');
+	}]]></add>
+		</operation>
+		<operation>
+			<search position="replace"><![CDATA[	require_once($sourcedir . '/Subs-BoardIndex.php');]]></search>
+			<add><![CDATA[	require_once($sourcedir . '/Subs-BoardIndex-clone.php');]]></add>
+		</operation>
+	</file>
+
+	<file name="$sourcedir/ManageBoards.php">
+		<operation>
+			<search position="before"><![CDATA[
+	loadPermissionProfiles();]]></search>
+			<add><![CDATA[
+
+	require_once($sourcedir . '/Subs-MessageIndex.php');
+	$context['boards_options'] = getBoardList();]]></add>
+		</operation>
+		<operation>
+			<search position="before"><![CDATA[
+			'redirect' => '',]]></search>
+			<add><![CDATA[
+			'clone' => false,]]></add>
+		</operation>
+		<operation>
+			<search position="before"><![CDATA[
+		$context['board']['is_recycle'] = !empty($modSettings['recycle_enable']) && !empty($modSettings['recycle_board']) && $modSettings['recycle_board'] == $context['board']['id'];]]></search>
+			<add><![CDATA[
+		$context['board']['is_clone'] = !empty($boards[$_REQUEST['boardid']]['clone']);]]></add>
+		</operation>
+		<operation>
+			<search position="before"><![CDATA[
+		$boardOptions['redirect'] = !empty($_POST['redirect_enable']) && isset($_POST['redirect_address']) && trim($_POST['redirect_address']) != '' ? trim($_POST['redirect_address']) : '';]]></search>
+			<add><![CDATA[
+		$boardOptions['clone'] = !empty($_POST['clone_enable']) && isset($_POST['clone']) && trim($_POST['clone']) != '' ? (int) $_POST['clone'] : 0;]]></add>
+		</operation>
+		<operation>
+			<search position="before"><![CDATA[SELECT redirect, num_posts]]></search>
+			<add><![CDATA[, clone]]></add>
+		</operation>
+		<operation>
+			<search position="before"><![CDATA[list ($oldRedirect, $numPosts]]></search>
+			<add><![CDATA[, $oldClone]]></add>
+		</operation>
+		<operation>
+			<search position="after"><![CDATA[
+			// If we're turning redirection on check the board doesn't have posts in it - if it does don't make it a redirection board.]]></search>
+			<add><![CDATA[			if ($boardOptions['redirect'] && empty($oldClone) && $numPosts)
+				unset($boardOptions['clone']);]]></add>
+		</operation>
+	</file>
+
+	<file name="$sourcedir/Subs-Boards.php">
+		<operation>
+			<search position="replace"><![CDATA[b.num_posts, b.num_topics, c.id_cat, c.name AS cat_name, c.cat_order, c.can_collapse]]></search>
+			<add><![CDATA[b.num_posts, b.num_topics, b.clone, c.id_cat, c.name AS cat_name, c.cat_order, c.can_collapse]]></add>
+		</operation>
+		<operation>
+			<search position="before"><![CDATA[
+				'redirect' => $row['redirect'],]]></search>
+			<add><![CDATA[
+				'clone' => $row['clone'],]]></add>
+		</operation>
+		<operation>
+			<search position="before"><![CDATA[
+	if (isset($boardOptions['redirect']))
+	{
+		$boardUpdates[] = 'redirect = {string:redirect}';
+		$boardUpdateParameters['redirect'] = $boardOptions['redirect'];
+	}]]></search>
+			<add><![CDATA[
+
+	if (isset($boardOptions['clone']))
+	{
+		$boardUpdates[] = 'clone = {int:clone}';
+		$boardUpdateParameters['clone'] = $boardOptions['clone'];
+	}]]></add>
+		</operation>
+	</file>
+
+	<file name="$themedir/ManageBoards.template.php">
+		<operation>
+			<search position="replace"><![CDATA[
+						<dt>
+							<strong', $context['board']['topics'] ? ' style="color: gray;"' : '', '>', $txt['mboards_redirect'], ':</strong><br />]]></search>
+			<add><![CDATA[
+						<dt>
+							<strong>', $txt['mboards_clone'], ':</strong><br />
+							<span class="smalltext">', $txt['mboards_clone_desc'], '</span><br />
+						</dt>
+						<dd>
+							<input type="checkbox" id="clone_enable" name="clone_enable"', empty($context['board']['is_clone']) ? '' : ' checked="checked"', ' class="input_check" />
+						</dd>
+					</dl>
+					<div id="clone_div">
+						<dl class="settings">
+							<dt>
+								<strong>', $txt['mboards_clone_id'], ':</strong>
+							</dt>
+							<dd>
+								<select name="clone">
+									<option ', empty($context['board']['clone']) ? 'selected="selected" ' : '', 'value="0">-----</option>';
+		foreach ($context['boards_options'] as $category)
+		{
+			echo '
+									<optgroup label="', $category['name'], '">';
+			foreach ($category['boards'] as $board)
+				echo '
+										<option ', !empty($context['board']['clone']) &&  $context['board']['clone'] == $board['id'] ? 'selected="selected" ' : '', $context['board']['id'] == $board['id'] ? 'disabled="disabled" ' : '', 'value="', $board['id'], '"> ', !empty($board['child_level']) ? (str_repeat('==', $board['child_level'] - 1) . '=> ') : '', $board['name'], '</option>';
+			echo '
+									</optgroup>';
+		}
+		echo '
+								</select>
+							</dd>
+						</dl>
+					</div>';
+
+	if (empty($context['board']['is_recycle']) && empty($context['board']['topics']))
+		echo '
+					<dl class="settings">
+						<dt>
+							<strong', $context['board']['topics'] ? ' style="color: gray;"' : '', '>', $txt['mboards_redirect'], ':</strong><br />]]></add>
+		</operation>
+	</file>
+
+</modification>

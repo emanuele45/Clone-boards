@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+
+	<id>emanuele:clone_boards</id>
+	<name>Clone Boards</name>
+	<version>0.1.0</version>
+	<license>
+<!--
+/**
+ * Clone Boards (CBs)
+ *
+ * @package CBs
+ * @author emanuele
+ * @copyright 2011 emanuele, Simple Machines
+ * @license http://www.simplemachines.org/about/smf/license.php BSD
+ *
+ * @version 0.1.0
+ */
+-->
+	</license>
+
+	<file name="$languagedir/Modifications.english.php">
+		<operation>
+			<search position="end" />
+			<add><![CDATA[
+$txt['mboards_clone'] = 'Create a clone';
+$txt['mboards_clone_desc'] = 'A clone is a perfect reproduction of another board: it appear in the board index exactly like the board it represents. Once clickied it will works as a redirect to the cloned board';
+$txt['mboards_clone_id'] = 'The board to be cloned';
+]]></add>
+		</operation>
+	</file>
+
+</modification>
